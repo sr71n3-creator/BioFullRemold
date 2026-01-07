@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BIOLOMEMO • Sistema Neural de Biologia</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========== RESET ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: #0a0a16;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== FUNDO ANIMADO ========== */
+        .neural-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(14, 165, 233, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a16 0%, #151530 100%);
+            overflow: hidden;
+        }
+
+        .neural-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(14, 165, 233, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* ========== LOADING ========== */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a16;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+
+        .dna-loader {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .dna-strand {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #0ea5e9;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        /* ========== CABEÇALHO ========== */
+        .header {
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #0ea5e9, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* ========== GRADE DE NEURÔNIOS ========== */
+        .neurons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .neuron {
+            position: relative;
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 15px;
+            padding: 20px 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .neuron::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .neuron:hover {
+            transform: translateY(-5px);
+            border-color: #0ea5e9;
+            box-shadow: 0 10px 30px rgba(14, 165, 233, 0.3);
+        }
+
+        .neuron:hover::before {
+            transform: translateX(100%);
+        }
+
+        .neuron.completed {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10b981;
+        }
+
+        .neuron-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(14, 165, 233, 0.2);
+            color: #0ea5e9;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .neuron-icon {
+            font-size: 2.5rem;
+            margin: 15px 0;
+            color: #8b5cf6;
+        }
+
+        .neuron-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .neuron-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+            border-radius: 0 0 15px 15px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* ========== INTERFACE DE ESTUDO ========== */
+        #studyInterface {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a16;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+
+        .study-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(20, 20, 40, 0.9);
+            border-bottom: 1px solid rgba(14, 165, 233, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: #0ea5e9;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 10px;
+            margin-right: 15px;
+        }
+
+        .chapter-title {
+            flex: 1;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .study-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .iframe-container {
+            flex: 2;
+            position: relative;
+            background: #fff;
+        }
+
+        #contentFrame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .study-panel {
+            flex: 1;
+            background: rgba(20, 20, 40, 0.9);
+            border-top: 1px solid rgba(14, 165, 233, 0.3);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #0ea5e9;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #0ea5e9;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #notesArea {
+            width: 100%;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            padding: 15px;
+            font-family: 'Exo 2', sans-serif;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(14, 165, 233, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0ea5e9;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #0ea5e9, #8b5cf6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        /* ========== RESPONSIVO ========== */
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .neurons-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .neuron {
+                padding: 15px 5px;
+            }
+            
+            .neuron-icon {
+                font-size: 2rem;
+            }
+            
+            .neuron-title {
+                font-size: 0.8rem;
+            }
+            
+            .study-content {
+                flex-direction: column;
+            }
+            
+            .iframe-container {
+                flex: 3;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .neurons-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .neuron {
+                padding: 10px 5px;
+            }
+            
+            .neuron-icon {
+                font-size: 1.8rem;
+                margin: 10px 0;
+            }
+            
+            .progress-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========== LOADING ========== -->
+    <div id="loading">
+        <div class="dna-loader">
+            <div class="dna-strand"></div>
+        </div>
+        <div style="color: #0ea5e9; font-weight: 600; margin-top: 20px;">INICIALIZANDO SISTEMA NEURAL...</div>
+    </div>
+
+    <!-- ========== FUNDO ANIMADO ========== -->
+    <div class="neural-bg" id="neuralBg"></div>
+
+    <!-- ========== CABEÇALHO ========== -->
+    <header class="header">
+        <h1 class="title">BIOLOMEMO</h1>
+        <div class="subtitle">Sistema Neural de Aprendizado de Biologia</div>
+        <div style="color: rgba(255, 255, 255, 0.5); font-size: 0.9rem; max-width: 600px; margin: 0 auto;">
+            Selecione um neurônio para acessar o conteúdo do capítulo
+        </div>
+    </header>
+
+    <!-- ========== GRADE DE NEURÔNIOS ========== -->
+    <div class="neurons-grid" id="neuronsGrid">
+        <!-- Neurônios serão gerados por JavaScript -->
+    </div>
+
+    <!-- ========== INTERFACE DE ESTUDO ========== -->
+    <div id="studyInterface">
+        <div class="study-header">
+            <button class="back-btn" onclick="returnToGrid()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="chapter-title" id="chapterTitle">Capítulo 00: Introdução</div>
+        </div>
+        
+        <div class="study-content">
+            <div class="iframe-container">
+                <iframe id="contentFrame" src="about:blank"></iframe>
+            </div>
+            
+            <div class="study-panel">
+                <div class="panel-tabs">
+                    <button class="tab active" onclick="switchTab('notes')">Anotações</button>
+                    <button class="tab" onclick="switchTab('progress')">Progresso</button>
+                    <button class="tab" onclick="switchTab('tools')">Ferramentas</button>
+                </div>
+                
+                <div id="notesTab" class="tab-content active">
+                    <textarea id="notesArea" placeholder="Digite suas anotações aqui... Elas serão salvas automaticamente."></textarea>
+                    <button class="action-btn" onclick="saveNotes()">
+                        <i class="fas fa-save"></i> Salvar Anotações
+                    </button>
+                </div>
+                
+                <div id="progressTab" class="tab-content">
+                    <div class="progress-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="completedCount">0</div>
+                            <div class="stat-label">Capítulos Concluídos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalNotes">0</div>
+                            <div class="stat-label">Anotações</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="color: rgba(255, 255, 255, 0.8);">Progresso Geral</span>
+                            <span id="progressPercent" style="color: #0ea5e9; font-weight: bold;">0%</span>
+                        </div>
+                        <div style="height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; overflow: hidden;">
+                            <div id="progressBar" style="height: 100%; background: linear-gradient(90deg, #0ea5e9, #8b5cf6); width: 0%; border-radius: 5px;"></div>
+                        </div>
+                    </div>
+                    
+                    <button class="action-btn" onclick="markChapterCompleted()">
+                        <i class="fas fa-check-circle"></i> Marcar como Concluído
+                    </button>
+                </div>
+                
+                <div id="toolsTab" class="tab-content">
+                    <button class="action-btn" onclick="exportData()">
+                        <i class="fas fa-download"></i> Exportar Dados
+                    </button>
+                    <button class="action-btn" onclick="importData()" style="background: linear-gradient(45deg, #10b981, #0ea5e9); margin-top: 10px;">
+                        <i class="fas fa-upload"></i> Importar Dados
+                    </button>
+                    <button class="action-btn" onclick="clearData()" style="background: linear-gradient(45deg, #ef4444, #dc2626); margin-top: 10px;">
+                        <i class="fas fa-trash"></i> Limpar Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div>Sistema de Aprendizado Neural - BioloMemo</div>
+        <div style="margin-top: 5px; font-size: 0.8rem;">Versão 1.0 • Online</div>
+    </footer>
+
+    <script>
+        // ========== DADOS DOS CAPÍTULOS ==========
+        const chapters = [
+            { number: "00", title: "Introdução", icon: "🏛️", link: "https://github.com/sr71n3" },
+            { number: "01", title: "Origem da Vida", icon: "🌋", link: "https://www.google.com/search?q=origem+da+vida+biologia" },
+            { number: "02", title: "Citologia", icon: "🔬", link: "https://www.google.com/search?q=citologia+biologia" },
+            { number: "03", title: "Composição Celular", icon: "🧫", link: "https://www.google.com/search?q=composição+celular" },
+            { number: "04", title: "Superfície Celular", icon: "🛡️", link: "https://www.google.com/search?q=superfície+celular" },
+            { number: "05", title: "Citoplasma", icon: "🌀", link: "https://www.google.com/search?q=citoplasma+biologia" },
+            { number: "06", title: "Metabolismo Energético", icon: "⚡", link: "https://www.google.com/search?q=metabolismo+energético" },
+            { number: "07", title: "Núcleo e Síntese Proteica", icon: "🧬", link: "https://www.google.com/search?q=núcleo+síntese+proteica" },
+            { number: "08", title: "Divisões Celulares", icon: "🔄", link: "https://www.google.com/search?q=divisões+celulares" },
+            { number: "09", title: "Reprodução", icon: "👨‍👩‍👧‍👦", link: "https://www.google.com/search?q=reprodução+biologia" },
+            { number: "10", title: "Desenvolvimento Embrionário", icon: "👶", link: "https://www.google.com/search?q=desenvolvimento+embrionário" },
+            { number: "11", title: "Histologia Animal", icon: "🔍", link: "https://www.google.com/search?q=histologia+animal" },
+            { number: "12", title: "Evolução", icon: "🦖", link: "https://www.google.com/search?q=evolução+biologia" },
+            { number: "13", title: "Vírus", icon: "🦠", link: "https://www.google.com/search?q=vírus+biologia" },
+            { number: "14", title: "Monera", icon: "🦠", link: "https://www.google.com/search?q=monera+biologia" },
+            { number: "15", title: "Protista", icon: "🐙", link: "https://www.google.com/search?q=protista+biologia" },
+            { number: "16", title: "Fungi", icon: "🍄", link: "https://www.google.com/search?q=fungi+biologia" },
+            { number: "17", title: "Plantae", icon: "🌿", link: "https://www.google.com/search?q=plantae+biologia" },
+            { number: "18", title: "Morfologia Vegetal", icon: "🌱", link: "https://www.google.com/search?q=morfologia+vegetal" },
+            { number: "19", title: "Fisiologia Vegetal", icon: "🌻", link: "https://www.google.com/search?q=fisiologia+vegetal" },
+            { number: "20", title: "Introdução aos Animais", icon: "🐾", link: "https://www.google.com/search?q=introdução+animais+biologia" },
+            { number: "21", title: "Platelmintos e Nematoda", icon: "🐛", link: "https://www.google.com/search?q=platelmintos+nematoda" },
+            { number: "22", title: "Mollusca e Anelida", icon: "🐌", link: "https://www.google.com/search?q=mollusca+anelida" },
+            { number: "23", title: "Arthropoda e Equinodermata", icon: "🦀", link: "https://www.google.com/search?q=arthropoda+equinodermata" },
+            { number: "24", title: "Cordata 1", icon: "🐠", link: "https://www.google.com/search?q=cordata+biologia" },
+            { number: "25", title: "Cordata 2", icon: "🐒", link: "https://www.google.com/search?q=cordata+vertebrados" },
+            { number: "26", title: "Sustentação, Digestão, Respiração", icon: "🫁", link: "https://www.google.com/search?q=sustentação+digestão+respiração" },
+            { number: "27", title: "Circulação, Defesa, Excreção", icon: "❤️", link: "https://www.google.com/search?q=circulação+defesa+excreção" },
+            { number: "28", title: "Coordenação e Regulação", icon: "🧠", link: "https://www.google.com/search?q=coordenação+regulação+biologia" },
+            { number: "29", title: "Genética Clássica", icon: "🧬", link: "https://www.google.com/search?q=genética+clássica" },
+            { number: "30", title: "Primeira Lei de Mendel", icon: "🌱", link: "https://www.google.com/search?q=primeira+lei+mendel" },
+            { number: "31", title: "Segunda Lei de Mendel", icon: "🌾", link: "https://www.google.com/search?q=segunda+lei+mendel" },
+            { number: "32", title: "Ligação Gênica", icon: "🔗", link: "https://www.google.com/search?q=ligação+gênica" },
+            { number: "33", title: "Mutação", icon: "⚡", link: "https://www.google.com/search?q=mutação+genética" },
+            { number: "34", title: "Cromossomos e Genes", icon: "🧬", link: "https://www.google.com/search?q=cromossomos+genes" },
+            { number: "35", title: "Biotecnologia", icon: "🧪", link: "https://www.google.com/search?q=biotecnologia+biologia" },
+            { number: "36", title: "Teoria da Evolução", icon: "🦍", link: "https://www.google.com/search?q=teoria+evolução" },
+            { number: "37", title: "Ecologia Populacional", icon: "👥", link: "https://www.google.com/search?q=ecologia+populacional" },
+            { number: "38", title: "Ecologia de Comunidades", icon: "🌳", link: "https://www.google.com/search?q=ecologia+comunidades" },
+            { number: "39", title: "Relações Ecológicas", icon: "🤝", link: "https://www.google.com/search?q=relações+ecológicas" },
+            { number: "40", title: "Sucessão Ecológica", icon: "🔄", link: "https://www.google.com/search?q=sucessão+ecológica" },
+            { number: "41", title: "Equilíbrio Ecológico", icon: "⚖️", link: "https://www.google.com/search?q=equilíbrio+ecológico" }
+        ];
+
+        // ========== VARIÁVEIS GLOBAIS ==========
+        let currentChapter = null;
+        let userData = {
+            completedChapters: {},
+            notes: {},
+            progress: 0
+        };
+
+        // ========== INICIALIZAÇÃO ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar dados do localStorage
+            loadUserData();
+            
+            // Criar partículas de fundo
+            createParticles();
+            
+            // Criar grade de neurônios
+            createNeuronsGrid();
+            
+            // Esconder loading após 1.5 segundos
+            setTimeout(() => {
+                document.getElementById('loading').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 500);
+            }, 1500);
+            
+            // Atualizar progresso
+            updateProgress();
+            
+            console.log("✅ BioloMemo inicializado com sucesso!");
+        });
+
+        // ========== FUNÇÕES DE DADOS ==========
+        function loadUserData() {
+            const savedData = localStorage.getItem('biolomemo_data');
+            if (savedData) {
+                try {
+                    userData = JSON.parse(savedData);
+                    console.log("📁 Dados carregados do localStorage");
+                } catch (e) {
+                    console.error("Erro ao carregar dados:", e);
+                    resetUserData();
+                }
+            }
+        }
+
+        function saveUserData() {
+            try {
+                localStorage.setItem('biolomemo_data', JSON.stringify(userData));
+                console.log("💾 Dados salvos no localStorage");
+            } catch (e) {
+                console.error("Erro ao salvar dados:", e);
+            }
+        }
+
+        function resetUserData() {
+            userData = {
+                completedChapters: {},
+                notes: {},
+                progress: 0
+            };
+            saveUserData();
+            updateProgress();
+            alert("Dados resetados com sucesso!");
+        }
+
+        // ========== INTERFACE DE NEURÔNIOS ==========
+        function createNeuronsGrid() {
+            const grid = document.getElementById('neuronsGrid');
+            grid.innerHTML = '';
+            
+            chapters.forEach(chapter => {
+                const neuron = document.createElement('div');
+                neuron.className = 'neuron';
+                if (userData.completedChapters[chapter.number]) {
+                    neuron.classList.add('completed');
+                }
+                
+                neuron.innerHTML = `
+                    <div class="neuron-number">${chapter.number}</div>
+                    <div class="neuron-icon">${chapter.icon}</div>
+                    <div class="neuron-title">${chapter.title}</div>
+                    <div class="neuron-progress"></div>
+                `;
+                
+                neuron.addEventListener('click', () => openChapter(chapter));
+                grid.appendChild(neuron);
+            });
+        }
+
+        // ========== GERENCIAMENTO DE CAPÍTULOS ==========
+        function openChapter(chapter) {
+            currentChapter = chapter;
+            
+            // Atualizar título
+            document.getElementById('chapterTitle').textContent = 
+                `Capítulo ${chapter.number}: ${chapter.title}`;
+            
+            // Carregar conteúdo
+            document.getElementById('contentFrame').src = chapter.link;
+            
+            // Carregar anotações
+            document.getElementById('notesArea').value = 
+                userData.notes[chapter.number] || '';
+            
+            // Mostrar interface de estudo
+            document.getElementById('studyInterface').style.display = 'flex';
+            
+            // Atualizar progresso do neurônio
+            updateNeuronProgress(chapter.number);
+        }
+
+        function returnToGrid() {
+            // Salvar anotações antes de sair
+            if (currentChapter) {
+                saveNotes();
+            }
+            
+            // Esconder interface de estudo
+            document.getElementById('studyInterface').style.display = 'none';
+            document.getElementById('contentFrame').src = 'about:blank';
+            currentChapter = null;
+        }
+
+        // ========== ANOTAÇÕES ==========
+        function saveNotes() {
+            if (!currentChapter) return;
+            
+            const notes = document.getElementById('notesArea').value;
+            userData.notes[currentChapter.number] = notes;
+            saveUserData();
+            updateProgress();
+            
+            // Mostrar feedback
+            showNotification('Anotações salvas com sucesso!');
+        }
+
+        // ========== PROGRESSO ==========
+        function markChapterCompleted() {
+            if (!currentChapter) return;
+            
+            if (confirm(`Marcar Capítulo ${currentChapter.number} como concluído?`)) {
+                userData.completedChapters[currentChapter.number] = true;
+                saveUserData();
+                updateProgress();
+                createNeuronsGrid(); // Atualizar grade
+                
+                showNotification('Capítulo marcado como concluído!');
+            }
+        }
+
+        function updateProgress() {
+            // Calcular progresso
+            const completed = Object.keys(userData.completedChapters).length;
+            const total = chapters.length;
+            const progress = Math.round((completed / total) * 100);
+            
+            // Atualizar UI
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalNotes').textContent = Object.keys(userData.notes).length;
+            document.getElementById('progressPercent').textContent = `${progress}%`;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Atualizar dados
+            userData.progress = progress;
+        }
+
+        function updateNeuronProgress(chapterNumber) {
+            const neurons = document.querySelectorAll('.neuron');
+            neurons.forEach(neuron => {
+                const numberDiv = neuron.querySelector('.neuron-number');
+                if (numberDiv && numberDiv.textContent === chapterNumber) {
+                    const progressBar = neuron.querySelector('.neuron-progress');
+                    if (userData.completedChapters[chapterNumber]) {
+                        progressBar.style.width = '100%';
+                    } else {
+                        // Simular progresso baseado em tempo de estudo
+                        const studyTime = Math.min(100, Math.random() * 30 + 10);
+                        progressBar.style.width = `${studyTime}%`;
+                    }
+                }
+            });
+        }
+
+        // ========== FERRAMENTAS ==========
+        function switchTab(tabName) {
+            // Remover classe active de todas as tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Ativar tab selecionada
+            document.querySelector(`.tab[onclick*="${tabName}"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(userData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `biolomemo_backup_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Dados exportados com sucesso!');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        userData = importedData;
+                        saveUserData();
+                        createNeuronsGrid();
+                        updateProgress();
+                        showNotification('Dados importados com sucesso!');
+                    } catch (error) {
+                        alert('Erro ao importar dados. Arquivo inválido.');
+                    }
+                };
+                
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function clearData() {
+            if (confirm('Tem certeza que deseja limpar todos os dados? Isso não pode ser desfeito.')) {
+                resetUserData();
+                createNeuronsGrid();
+                showNotification('Todos os dados foram limpos.');
+            }
+        }
+
+        // ========== EFEITOS VISUAIS ==========
+        function createParticles() {
+            const bg = document.getElementById('neuralBg');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'neural-particle';
+                
+                // Posição aleatória
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                
+                // Tamanho aleatório
+                const size = 1 + Math.random() * 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Atraso na animação
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                
+                // Cor aleatória
+                const colors = [
+                    'rgba(14, 165, 233, 0.5)',
+                    'rgba(139, 92, 246, 0.5)',
+                    'rgba(16, 185, 129, 0.5)'
+                ];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                bg.appendChild(particle);
+            }
+        }
+
+        function showNotification(message) {
+            // Criar elemento de notificação
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(45deg, #0ea5e9, #8b5cf6);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                font-weight: 600;
+                box-shadow: 0 5px 20px rgba(14, 165, 233, 0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // Remover após 3 segundos
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+            
+            // Adicionar animações CSS
+            if (!document.querySelector('#notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // ========== ATALHOS DE TECLADO ==========
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('studyInterface').style.display === 'flex') {
+                returnToGrid();
+            }
+            
+            if (e.ctrlKey && e.key === 's' && currentChapter) {
+                e.preventDefault();
+                saveNotes();
+            }
+        });
+
+        // ========== DETECÇÃO DE KODULAR ==========
+        if (/Kodular|WebView|Android.*AppleWebKit/.test(navigator.userAgent)) {
+            console.log("📱 Modo Kodular detectado - Aplicando otimizações...");
+            
+            // Forçar fullscreen
+            setTimeout(() => {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+            }, 1000);
+            
+            // Adicionar estilo para scroll suave
+            document.body.style.cssText += `
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior: none;
+            `;
+        }
+    </script>
+</body>
+</html>
