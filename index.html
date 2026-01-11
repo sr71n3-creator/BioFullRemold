@@ -538,49 +538,50 @@
 
     <script>
         // ========== DADOS DOS CAPÍTULOS ==========
+        // Agora usando arquivos locais do mesmo repositório
         const chapters = [
-            { number: "00", title: "Introdução", icon: "🏛️", link: "https://github.com/sr71n3" },
-            { number: "01", title: "Origem da Vida", icon: "🌋", link: "https://www.google.com/search?q=origem+da+vida+biologia" },
-            { number: "02", title: "Citologia", icon: "🔬", link: "https://www.google.com/search?q=citologia+biologia" },
-            { number: "03", title: "Composição Celular", icon: "🧫", link: "https://www.google.com/search?q=composição+celular" },
-            { number: "04", title: "Superfície Celular", icon: "🛡️", link: "https://www.google.com/search?q=superfície+celular" },
-            { number: "05", title: "Citoplasma", icon: "🌀", link: "https://www.google.com/search?q=citoplasma+biologia" },
-            { number: "06", title: "Metabolismo Energético", icon: "⚡", link: "https://www.google.com/search?q=metabolismo+energético" },
-            { number: "07", title: "Núcleo e Síntese Proteica", icon: "🧬", link: "https://www.google.com/search?q=núcleo+síntese+proteica" },
-            { number: "08", title: "Divisões Celulares", icon: "🔄", link: "https://www.google.com/search?q=divisões+celulares" },
-            { number: "09", title: "Reprodução", icon: "👨‍👩‍👧‍👦", link: "https://www.google.com/search?q=reprodução+biologia" },
-            { number: "10", title: "Desenvolvimento Embrionário", icon: "👶", link: "https://www.google.com/search?q=desenvolvimento+embrionário" },
-            { number: "11", title: "Histologia Animal", icon: "🔍", link: "https://www.google.com/search?q=histologia+animal" },
-            { number: "12", title: "Evolução", icon: "🦖", link: "https://www.google.com/search?q=evolução+biologia" },
-            { number: "13", title: "Vírus", icon: "🦠", link: "https://www.google.com/search?q=vírus+biologia" },
-            { number: "14", title: "Monera", icon: "🦠", link: "https://www.google.com/search?q=monera+biologia" },
-            { number: "15", title: "Protista", icon: "🐙", link: "https://www.google.com/search?q=protista+biologia" },
-            { number: "16", title: "Fungi", icon: "🍄", link: "https://www.google.com/search?q=fungi+biologia" },
-            { number: "17", title: "Plantae", icon: "🌿", link: "https://www.google.com/search?q=plantae+biologia" },
-            { number: "18", title: "Morfologia Vegetal", icon: "🌱", link: "https://www.google.com/search?q=morfologia+vegetal" },
-            { number: "19", title: "Fisiologia Vegetal", icon: "🌻", link: "https://www.google.com/search?q=fisiologia+vegetal" },
-            { number: "20", title: "Introdução aos Animais", icon: "🐾", link: "https://www.google.com/search?q=introdução+animais+biologia" },
-            { number: "21", title: "Platelmintos e Nematoda", icon: "🐛", link: "https://www.google.com/search?q=platelmintos+nematoda" },
-            { number: "22", title: "Mollusca e Anelida", icon: "🐌", link: "https://www.google.com/search?q=mollusca+anelida" },
-            { number: "23", title: "Arthropoda e Equinodermata", icon: "🦀", link: "https://www.google.com/search?q=arthropoda+equinodermata" },
-            { number: "24", title: "Cordata 1", icon: "🐠", link: "https://www.google.com/search?q=cordata+biologia" },
-            { number: "25", title: "Cordata 2", icon: "🐒", link: "https://www.google.com/search?q=cordata+vertebrados" },
-            { number: "26", title: "Sustentação, Digestão, Respiração", icon: "🫁", link: "https://www.google.com/search?q=sustentação+digestão+respiração" },
-            { number: "27", title: "Circulação, Defesa, Excreção", icon: "❤️", link: "https://www.google.com/search?q=circulação+defesa+excreção" },
-            { number: "28", title: "Coordenação e Regulação", icon: "🧠", link: "https://www.google.com/search?q=coordenação+regulação+biologia" },
-            { number: "29", title: "Genética Clássica", icon: "🧬", link: "https://www.google.com/search?q=genética+clássica" },
-            { number: "30", title: "Primeira Lei de Mendel", icon: "🌱", link: "https://www.google.com/search?q=primeira+lei+mendel" },
-            { number: "31", title: "Segunda Lei de Mendel", icon: "🌾", link: "https://www.google.com/search?q=segunda+lei+mendel" },
-            { number: "32", title: "Ligação Gênica", icon: "🔗", link: "https://www.google.com/search?q=ligação+gênica" },
-            { number: "33", title: "Mutação", icon: "⚡", link: "https://www.google.com/search?q=mutação+genética" },
-            { number: "34", title: "Cromossomos e Genes", icon: "🧬", link: "https://www.google.com/search?q=cromossomos+genes" },
-            { number: "35", title: "Biotecnologia", icon: "🧪", link: "https://www.google.com/search?q=biotecnologia+biologia" },
-            { number: "36", title: "Teoria da Evolução", icon: "🦍", link: "https://www.google.com/search?q=teoria+evolução" },
-            { number: "37", title: "Ecologia Populacional", icon: "👥", link: "https://www.google.com/search?q=ecologia+populacional" },
-            { number: "38", title: "Ecologia de Comunidades", icon: "🌳", link: "https://www.google.com/search?q=ecologia+comunidades" },
-            { number: "39", title: "Relações Ecológicas", icon: "🤝", link: "https://www.google.com/search?q=relações+ecológicas" },
-            { number: "40", title: "Sucessão Ecológica", icon: "🔄", link: "https://www.google.com/search?q=sucessão+ecológica" },
-            { number: "41", title: "Equilíbrio Ecológico", icon: "⚖️", link: "https://www.google.com/search?q=equilíbrio+ecológico" }
+            { number: "00", title: "Introdução", icon: "🏛️", link: "capitulo-00.html" },
+            { number: "01", title: "Origem da Vida", icon: "🌋", link: "capitulo-01.html" },
+            { number: "02", title: "Citologia", icon: "🔬", link: "capitulo-02.html" },
+            { number: "03", title: "Composição Celular", icon: "🧫", link: "capitulo-03.html" },
+            { number: "04", title: "Superfície Celular", icon: "🛡️", link: "capitulo-04.html" },
+            { number: "05", title: "Citoplasma", icon: "🌀", link: "capitulo-05.html" },
+            { number: "06", title: "Metabolismo Energético", icon: "⚡", link: "capitulo-06.html" },
+            { number: "07", title: "Núcleo e Síntese Proteica", icon: "🧬", link: "capitulo-07.html" },
+            { number: "08", title: "Divisões Celulares", icon: "🔄", link: "capitulo-08.html" },
+            { number: "09", title: "Reprodução", icon: "👨‍👩‍👧‍👦", link: "capitulo-09.html" },
+            { number: "10", title: "Desenvolvimento Embrionário", icon: "👶", link: "capitulo-10.html" },
+            { number: "11", title: "Histologia Animal", icon: "🔍", link: "capitulo-11.html" },
+            { number: "12", title: "Evolução", icon: "🦖", link: "capitulo-12.html" },
+            { number: "13", title: "Vírus", icon: "🦠", link: "capitulo-13.html" },
+            { number: "14", title: "Monera", icon: "🦠", link: "capitulo-14.html" },
+            { number: "15", title: "Protista", icon: "🐙", link: "capitulo-15.html" },
+            { number: "16", title: "Fungi", icon: "🍄", link: "capitulo-16.html" },
+            { number: "17", title: "Plantae", icon: "🌿", link: "capitulo-17.html" },
+            { number: "18", title: "Morfologia Vegetal", icon: "🌱", link: "capitulo-18.html" },
+            { number: "19", title: "Fisiologia Vegetal", icon: "🌻", link: "capitulo-19.html" },
+            { number: "20", title: "Introdução aos Animais", icon: "🐾", link: "capitulo-20.html" },
+            { number: "21", title: "Platelmintos e Nematoda", icon: "🐛", link: "capitulo-21.html" },
+            { number: "22", title: "Mollusca e Anelida", icon: "🐌", link: "capitulo-22.html" },
+            { number: "23", title: "Arthropoda e Equinodermata", icon: "🦀", link: "capitulo-23.html" },
+            { number: "24", title: "Cordata 1", icon: "🐠", link: "capitulo-24.html" },
+            { number: "25", title: "Cordata 2", icon: "🐒", link: "capitulo-25.html" },
+            { number: "26", title: "Sustentação, Digestão, Respiração", icon: "🫁", link: "capitulo-26.html" },
+            { number: "27", title: "Circulação, Defesa, Excreção", icon: "❤️", link: "capitulo-27.html" },
+            { number: "28", title: "Coordenação e Regulação", icon: "🧠", link: "capitulo-28.html" },
+            { number: "29", title: "Genética Clássica", icon: "🧬", link: "capitulo-29.html" },
+            { number: "30", title: "Primeira Lei de Mendel", icon: "🌱", link: "capitulo-30.html" },
+            { number: "31", title: "Segunda Lei de Mendel", icon: "🌾", link: "capitulo-31.html" },
+            { number: "32", title: "Ligação Gênica", icon: "🔗", link: "capitulo-32.html" },
+            { number: "33", title: "Mutação", icon: "⚡", link: "capitulo-33.html" },
+            { number: "34", title: "Cromossomos e Genes", icon: "🧬", link: "capitulo-34.html" },
+            { number: "35", title: "Biotecnologia", icon: "🧪", link: "capitulo-35.html" },
+            { number: "36", title: "Teoria da Evolução", icon: "🦍", link: "capitulo-36.html" },
+            { number: "37", title: "Ecologia Populacional", icon: "👥", link: "capitulo-37.html" },
+            { number: "38", title: "Ecologia de Comunidades", icon: "🌳", link: "capitulo-38.html" },
+            { number: "39", title: "Relações Ecológicas", icon: "🤝", link: "capitulo-39.html" },
+            { number: "40", title: "Sucessão Ecológica", icon: "🔄", link: "capitulo-40.html" },
+            { number: "41", title: "Equilíbrio Ecológico", icon: "⚖️", link: "capitulo-41.html" }
         ];
 
         // ========== VARIÁVEIS GLOBAIS ==========
@@ -682,7 +683,7 @@
             document.getElementById('chapterTitle').textContent = 
                 `Capítulo ${chapter.number}: ${chapter.title}`;
             
-            // Carregar conteúdo
+            // Carregar conteúdo LOCAL do mesmo repositório
             document.getElementById('contentFrame').src = chapter.link;
             
             // Carregar anotações
@@ -942,6 +943,22 @@
                 overscroll-behavior: none;
             `;
         }
+
+        // ========== CONTROLE DE ERROS PARA ARQUIVOS LOCAIS ==========
+        document.getElementById('contentFrame').addEventListener('load', function() {
+            try {
+                const iframe = document.getElementById('contentFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                // Verificar se a página carregou corretamente
+                if (iframeDoc.body && iframeDoc.body.innerHTML.includes('404')) {
+                    showNotification('Arquivo do capítulo não encontrado!');
+                    iframe.src = `capitulo-placeholder.html?capitulo=${currentChapter.number}&titulo=${encodeURIComponent(currentChapter.title)}`;
+                }
+            } catch (e) {
+                // Cross-origin error - ignore
+            }
+        });
     </script>
 </body>
 </html>
